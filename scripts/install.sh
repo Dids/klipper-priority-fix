@@ -22,10 +22,16 @@ KLIPPER_PRIORITY_FIX_ROOT_PATH="$(cd "${SCRIPT_PATH}/.." >/dev/null 2>&1; pwd -P
 KLIPPER_PRIORITY_FIX_INSTALL_PATH="/usr/local/bin"
 KLIPPER_PRIORITY_FIX_SERVICE_NAME="klipper-priority-fix"
 KLIPPER_PRIORITY_FIX_SERVICE_VERSION="2"
+PYTHON_ENV_PATH="${HOME}/klipper-priority-fix-env"
 
-PYTHON_ENV_PATH="${HOME}/klipper-priority-fix-env}"
-# MOONRAKER_ASVC=~/printer_data/moonraker.asvc
+# Attempt to find the moonraker.asvc file, which is usually located under ~/printer_data/moonraker.asvc.
+# Search for the file in the following locations:
+# - ~/printer_data/moonraker.asvc
+# - ~/.moonraker/moonraker.asvc
+# - /home/*/**/printer_data/moonraker.asvc
+MOONRAKER_ASVC="$(find ~/printer_data/moonraker.asvc ~/.moonraker/moonraker.asvc /home/*/**/printer_data/moonraker.asvc 2>/dev/null | head -n 1)"
 
+# Load the utility functions.
 source "${SCRIPT_PATH}/util.sh"
 
 # Setup the Python virtual environment,
@@ -174,13 +180,6 @@ install_klipper-priority-fix_service
 
 # Start the klipper-priority-fix systemd service.
 start_systemd_service "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
-
-# Find the moonraker.asvc file, which is usually located in ~/printer_data/moonraker.asvc.
-# Search for the file in the following locations:
-# - ~/printer_data/moonraker.asvc
-# - ~/.moonraker/moonraker.asvc
-# - /home/*/**/printer_data/moonraker.asvc
-MOONRAKER_ASVC="$(find ~/printer_data/moonraker.asvc ~/.moonraker/moonraker.asvc /home/*/**/printer_data/moonraker.asvc 2>/dev/null | head -n 1)"
 
 # Update the moonraker.asvc file with the klipper-priority-fix service name,
 # then restart the Moonraker service.
