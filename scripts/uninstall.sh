@@ -42,6 +42,10 @@ else
   sudo rm -f /usr/local/bin/klipper-priority-fix
 fi
 
+# Remove the klipper-priority-fix Python virtual environment.
+echo "Removing klipper-priority-fix Python virtual environment ..."
+rm -fr ~/klipper-priority-fix-env
+
 # Remove the klipper-priority-fix source code.
 # echo "Removing klipper-priority-fix source code ..."
 # rm -fr ~/klipper-priority-fix
