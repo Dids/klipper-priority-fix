@@ -107,6 +107,15 @@ update_moonraker_asvc() {
   echo "Updating moonraker.asvc file with service ${SERVICE_NAME}"
   echo -e "\n${SERVICE_NAME}" >> $MOONRAKER_ASVC
 
+  # Restart the Moonraker service.
+  echo "Restarting Moonraker service ..."
+  if test $(id -u) -eq 0; then
+    systemctl restart moonraker.service
+  else
+    sudo systemctl restart moonraker.service
+  fi
+  echo "Moonraker service successfully restarted"
+
   echo "moonraker.asvc file successfully updated"
 }
 

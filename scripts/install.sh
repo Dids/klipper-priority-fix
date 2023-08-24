@@ -154,17 +154,6 @@ EOT
     enable_systemd_service "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
 }
 
-# Function for restarting the Moonraker service
-restart_moonraker_service() {
-    echo "Restarting Moonraker service ..."
-    if test $(id -u) -eq 0; then
-        systemctl restart moonraker.service
-    else
-        sudo systemctl restart moonraker.service
-    fi
-    echo "Moonraker service successfully restarted"
-}
-
 # Stop the klipper-priority-fix systemd service.
 stop_systemd_service "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
 
@@ -183,12 +172,8 @@ install_klipper-priority-fix_service
 # Start the klipper-priority-fix systemd service.
 start_systemd_service "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
 
-# Update the moonraker.asvc file with the klipper-priority-fix service name,
-# then restart the Moonraker service.
-if [ -f "${MOONRAKER_ASVC}" ]; then
-    update_moonraker_asvc "${MOONRAKER_ASVC}" "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
-    restart_moonraker_service
-fi
+# Update the moonraker.asvc file.
+update_moonraker_asvc "${MOONRAKER_ASVC}" "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
 
 ## FIXME: This is not working quite as well as it should, so should probably not be used right now!
 # Verify that the klipper-priority-fix systemd service is running.
