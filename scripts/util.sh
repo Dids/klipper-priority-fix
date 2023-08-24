@@ -60,7 +60,7 @@ create_virtualenv() {
 
   # Update pip and certain Python dependencies.
   echo "Checking for updates to pip and build dependencies"
-  ${VIRTUALENVDIR}/pip install --upgrade pip setuptools wheel
+  ${VIRTUALENVDIR}/bin/pip install --upgrade pip setuptools wheel
 
   # Install or update Python dependencies
   echo "Installing or updating Python dependencies"
