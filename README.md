@@ -30,7 +30,7 @@ install_script: scripts/install.sh
 managed_services: klipper-priority-fix
 ```
 
-Ensure that you also add `klipper-priority-fix` to the bottom of your `~/printer_data/moonraker.asvc` file, so that Moonraker can control the klipper-priority-fix service.
+While the installation script should already take care of this, ensure that the line `klipper-priority-fix` is added to the bottom of your `~/printer_data/moonraker.asvc` file, so that Moonraker can control the klipper-priority-fix service.
 
 If you setup the automatic updates above, you may additionally need to restart Moonraker.
 
