@@ -29,7 +29,9 @@ PYTHON_ENV_PATH="${HOME}/klipper-priority-fix-env"
 # - ~/printer_data/moonraker.asvc
 # - ~/.moonraker/moonraker.asvc
 # - /home/*/**/printer_data/moonraker.asvc
+set +o pipefail
 MOONRAKER_ASVC="$(find ~/printer_data/moonraker.asvc ~/.moonraker/moonraker.asvc /home/*/**/printer_data/moonraker.asvc 2>/dev/null | head -n 1)"
+set -o pipefail
 
 # Load the utility functions.
 source "${SCRIPT_PATH}/util.sh"
