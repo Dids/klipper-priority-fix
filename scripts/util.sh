@@ -49,16 +49,23 @@ create_virtualenv() {
     exit 1
   fi
 
+  # Create the Python virtual environment if it does not exist.
   if [ -d ${VIRTUALENVDIR} ]; then
     echo "Python virtual environment already exists"
   else
-    echo "Creating Python virtual environment ..."
-    virtualenv -p /usr/bin/python3 ${VIRTUALENVDIR}
+    echo "Creating Python virtual environment"
+    #virtualenv -p /usr/bin/python3 ${VIRTUALENVDIR}
+    virtualenv -p python3 ${VIRTUALENVDIR}
   fi
 
+  # Update pip and certain Python dependencies.
+  echo "Checking for updates to pip and build dependencies"
+  ${VIRTUALENVDIR}/pip install --upgrade pip setuptools wheel
+
   # Install or update Python dependencies
-  echo "Installing or updating Python dependencies ..."
+  echo "Installing or updating Python dependencies"
   ${VIRTUALENVDIR}/bin/pip install -r ${REQUIREMENTS_FILE}
+  export PYTHONDIR=${VIRTUALENVDIR}/bin
   echo "Python dependencies successfully installed or updated, environment ready"
 }
 
@@ -97,7 +104,7 @@ update_moonraker_asvc() {
   fi
 
   # Update the moonraker.asvc file with the service name.
-  echo "Updating moonraker.asvc file with service ${SERVICE_NAME} ..."
+  echo "Updating moonraker.asvc file with service ${SERVICE_NAME}"
   echo -e "\n${SERVICE_NAME}" >> $MOONRAKER_ASVC
 
   echo "moonraker.asvc file successfully updated"

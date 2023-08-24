@@ -21,28 +21,16 @@ SCRIPT_PATH="$(cd "$(dirname "$0")" >/dev/null 2>&1; pwd -P)"
 KLIPPER_PRIORITY_FIX_ROOT_PATH="$(cd "${SCRIPT_PATH}/.." >/dev/null 2>&1; pwd -P)"
 KLIPPER_PRIORITY_FIX_INSTALL_PATH="/usr/local/bin"
 KLIPPER_PRIORITY_FIX_SERVICE_NAME="klipper-priority-fix"
-KLIPPER_PRIORITY_FIX_SERVICE_VERSION="1"
+KLIPPER_PRIORITY_FIX_SERVICE_VERSION="2"
 
 PYTHON_ENV_PATH="${HOME}/klipper-priority-fix-env}"
-MOONRAKER_ASVC=~/printer_data/moonraker.asvc
+# MOONRAKER_ASVC=~/printer_data/moonraker.asvc
 
 source "${SCRIPT_PATH}/util.sh"
 
 # Setup the Python virtual environment,
 # and install any required Python dependencies.
 create_virtualenv "${PYTHON_ENV_PATH}" "${KLIPPER_PRIORITY_FIX_ROOT_PATH}/requirements.txt"
-
-# Ensure Python is available and meets the minimum version requirement (e.g., 3.6+)
-if ! command -v python3 &> /dev/null; then
-    echo "Python3 is not installed. Please install Python3 and try again."
-    exit 1
-fi
-python_version=$(python3 --version | awk '{print $2}')
-if [[ "$python_version" < "3.6" ]]; then
-    echo "Python version 3.6 or higher is required. Current version: $python_version"
-    exit 1
-fi
-PYTHON_PATH="$(which python3)"
 
 # Function for installing or updating the custom klipper-priority-fix binary.
 function install_klipper-priority-fix_binary() {
@@ -109,10 +97,10 @@ After=klipper.service
 
 [Service]
 Type=simple
-User=${user}
-Group=${group}
-ExecStart=${PYTHON_PATH} ${KLIPPER_PRIORITY_FIX_INSTALL_PATH}/klipper-priority-fix
-WorkingDirectory=${HOME}
+User=$user
+Group=$group
+ExecStart=$PYTHONDIR $KLIPPER_PRIORITY_FIX_INSTALL_PATH/klipper-priority-fix
+WorkingDirectory=$KLIPPER_PRIORITY_FIX_ROOT_PATH
 Restart=always
 RestartSec=10
 
@@ -158,6 +146,17 @@ EOT
     enable_systemd_service "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
 }
 
+# Function for restarting the Moonraker service
+restart_moonraker_service() {
+    echo "Restarting Moonraker service ..."
+    if test $(id -u) -eq 0; then
+        systemctl restart moonraker.service
+    else
+        sudo systemctl restart moonraker.service
+    fi
+    echo "Moonraker service successfully restarted"
+}
+
 # Stop the klipper-priority-fix systemd service.
 stop_systemd_service "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
 
@@ -185,8 +184,10 @@ MOONRAKER_ASVC="$(find ~/printer_data/moonraker.asvc ~/.moonraker/moonraker.asvc
 
 # Update the moonraker.asvc file with the klipper-priority-fix service name,
 # then restart the Moonraker service.
-update_moonraker_asvc "${MOONRAKER_ASVC}" "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
-restart_moonraker_service
+if [ -f "${MOONRAKER_ASVC}" ]; then
+    update_moonraker_asvc "${MOONRAKER_ASVC}" "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
+    restart_moonraker_service
+fi
 
 ## FIXME: This is not working quite as well as it should, so should probably not be used right now!
 # Verify that the klipper-priority-fix systemd service is running.
