@@ -65,7 +65,7 @@ create_virtualenv() {
   # Install or update Python dependencies
   echo "Installing or updating Python dependencies"
   ${VIRTUALENVDIR}/bin/pip install -r ${REQUIREMENTS_FILE}
-  export PYTHONDIR=${VIRTUALENVDIR}/bin
+  export PYTHONDIR=${VIRTUALENVDIR}
   echo "Python dependencies successfully installed or updated, environment ready"
 }
 
