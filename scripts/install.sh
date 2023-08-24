@@ -36,6 +36,9 @@ set -o pipefail
 # Load the utility functions.
 source "${SCRIPT_PATH}/util.sh"
 
+# Stop the service if it already exists.
+stop_systemd_service "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
+
 # Setup the Python virtual environment,
 # and install any required Python dependencies.
 create_virtualenv "${PYTHON_ENV_PATH}" "${KLIPPER_PRIORITY_FIX_ROOT_PATH}/requirements.txt"
