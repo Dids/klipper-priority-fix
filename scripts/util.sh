@@ -29,6 +29,80 @@ function version() {
   echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
 }
 
+# Function for creating a Python virtual environment.
+# Requires the path to the virtual environment as the first argument,
+# and the path to the requirements file as the second argument.
+create_virtualenv() {
+  echo "Checking Python virtual environment"
+
+  # Get the required arguments.
+  local VIRTUALENVDIR="${1}"
+  local REQUIREMENTS_FILE="${2}"
+
+  # Validate the required arguments.
+  if test -z "${VIRTUALENVDIR}"; then
+    echo "ERROR: create_virtualenv() argument 1 is required but not set" >&2
+    exit 1
+  fi
+  if test -z "${REQUIREMENTS_FILE}"; then
+    echo "ERROR: create_virtualenv() argument 2 is required but not set" >&2
+    exit 1
+  fi
+
+  if [ -d ${VIRTUALENVDIR} ]; then
+    echo "Python virtual environment already exists"
+  else
+    echo "Creating Python virtual environment ..."
+    virtualenv -p /usr/bin/python3 ${VIRTUALENVDIR}
+  fi
+
+  # Install or update Python dependencies
+  echo "Installing or updating Python dependencies ..."
+  ${VIRTUALENVDIR}/bin/pip install -r ${REQUIREMENTS_FILE}
+  echo "Python dependencies successfully installed or updated, environment ready"
+}
+
+# Function for updating `moonraker.asvc` with the supplied service name.
+# Requires the path to the `moonraker.asvc` file as the first argument.
+# Requires the service name as the second argument.
+update_moonraker_asvc() {
+  echo "Checking if moonraker.asvc needs updating"
+
+  # Get the required arguments.
+  local MOONRAKER_ASVC="${1}"
+  local SERVICE_NAME="${2}"
+
+  # Validate the required arguments.
+  if test -z "${MOONRAKER_ASVC}"; then
+    echo "ERROR: update_moonraker_asvc() argument 1 is required but not set" >&2
+    exit 1
+  fi
+  if test -z "${SERVICE_NAME}"; then
+    echo "ERROR: update_moonraker_asvc() argument 2 is required but not set" >&2
+    exit 1
+  fi
+
+  # Check if the moonraker.asvc file exists,
+  # and skip updating it if it does not.
+  if test ! -e "${MOONRAKER_ASVC}"; then
+    echo "moonraker.asvc file does not exist, skipping"
+    return
+  fi
+
+  # Check if the moonraker.asvc file contains the service name,
+  # and skip updating it if it does.
+  if grep -q "${SERVICE_NAME}" "${MOONRAKER_ASVC}"; then
+    echo "moonraker.asvc file already contains service ${SERVICE_NAME}, skipping"
+    return
+  fi
+
+  # Update the moonraker.asvc file with the service name.
+  echo "Updating moonraker.asvc file with service ${SERVICE_NAME} ..."
+  echo -e "\n${SERVICE_NAME}" >> $MOONRAKER_ASVC
+
+  echo "moonraker.asvc file successfully updated"
+}
+
 # Function for reloading the systemd daemon and its services.
 function reload_systemd() {
   echo "Reloading systemd daemon ..."
@@ -162,5 +236,11 @@ verify_systemd_service_running() {
       echo "ERROR: systemd service ${1} is not running" >&2
       return 1
     fi
+  fi
+
+  # Ensure that the service is not in a failed state.
+  if systemctl is-failed "${1}" >/dev/null 2>&1; then
+    echo "ERROR: systemd service ${1} is in a failed state" >&2
+    return 1
   fi
 }

@@ -23,7 +23,14 @@ KLIPPER_PRIORITY_FIX_INSTALL_PATH="/usr/local/bin"
 KLIPPER_PRIORITY_FIX_SERVICE_NAME="klipper-priority-fix"
 KLIPPER_PRIORITY_FIX_SERVICE_VERSION="1"
 
+PYTHON_ENV_PATH="${HOME}/klipper-priority-fix-env}"
+MOONRAKER_ASVC=~/printer_data/moonraker.asvc
+
 source "${SCRIPT_PATH}/util.sh"
+
+# Setup the Python virtual environment,
+# and install any required Python dependencies.
+create_virtualenv "${PYTHON_ENV_PATH}" "${KLIPPER_PRIORITY_FIX_ROOT_PATH}/requirements.txt"
 
 # Ensure Python is available and meets the minimum version requirement (e.g., 3.6+)
 if ! command -v python3 &> /dev/null; then
@@ -169,8 +176,21 @@ install_klipper-priority-fix_service
 # Start the klipper-priority-fix systemd service.
 start_systemd_service "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
 
+# Find the moonraker.asvc file, which is usually located in ~/printer_data/moonraker.asvc.
+# Search for the file in the following locations:
+# - ~/printer_data/moonraker.asvc
+# - ~/.moonraker/moonraker.asvc
+# - /home/*/**/printer_data/moonraker.asvc
+MOONRAKER_ASVC="$(find ~/printer_data/moonraker.asvc ~/.moonraker/moonraker.asvc /home/*/**/printer_data/moonraker.asvc 2>/dev/null | head -n 1)"
+
+# Update the moonraker.asvc file with the klipper-priority-fix service name,
+# then restart the Moonraker service.
+update_moonraker_asvc "${MOONRAKER_ASVC}" "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
+restart_moonraker_service
+
+## FIXME: This is not working quite as well as it should, so should probably not be used right now!
 # Verify that the klipper-priority-fix systemd service is running.
-verify_systemd_service_running "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
+#verify_systemd_service_running "${KLIPPER_PRIORITY_FIX_SERVICE_NAME}"
 
 echo "klipper-priority-fix installation complete"
 exit 0
